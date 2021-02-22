@@ -1,0 +1,78 @@
+/* For AC-Web by EG3! */
+/* Any problems please report to EG3*/
+/*Thanks you DeniDov for fixing it */
+
+#include "ScriptPCH.h"
+#include "Chat.h"
+
+/*RANKS*/ // define ranks like this
+#define PLAYER "Player"
+#define VOTER "Voter"
+#define GAME_MASTER "GM"
+#define ADMINISTRATOR"Admin"
+
+/*COLORS*/ // define colors like this
+#define MSG_COLOR_RED "|cffE61725"
+#define MSG_COLOR_BLUE "|cff286BDE"
+#define MSG_COLOR_GREEN "|cff28DE3D"
+#define MSG_COLOR_WHITE "|cffE6EAF2"
+
+class World_Chat : public CommandScript
+
+ static bool HandleWorldChatCommand(ChatHandler * pChat, const char * msg)
+    {
+        if(!*msg)
+            return false;
+
+        Player * player = pChat->GetSession()->GetPlayer();
+        char message[1024];
+		
+		switch(player->GetSession()->GetSecurity())
+        {
+            case SEC_PLAYER:
+                snprintf(message, 1024, "[World][Player][%s%s|r]: %s%s|r", MSG_COLOR_WHITE, player->GetName(), MSG_COLOR_DARKORANGE, msg);
+                sWorld->SendGlobalText(message, NULL);
+            break;
+
+            case SEC_VOTER:
+                snprintf(message, 1024, "[World][%sModerator|r][%s%s|r]: %s%s|r", MSG_COLOR_PURPLE, MSG_COLOR_ORANGE, player->GetName(),
+                MSG_COLOR_GREEN, msg);
+                sWorld->SendGlobalText(message, NULL);
+            break;
+
+            case SEC_GAMEMASTER:
+                snprintf(message, 1024, "[World][%sGM|r][%s%s|r]: %s%s|r", MSG_COLOR_GREEN, MSG_COLOR_LIGHTBLUE, player->GetName(),
+                    MSG_COLOR_LIGHTBLUE, msg);
+                sWorld->SendGlobalText(message, NULL);
+            break;
+
+            case SEC_ADMINISTRATOR:
+                snprintf(message, 1024, "[World][%sHead GM|r][%s%s|r]: %s%s|r", MSG_COLOR_LIGHTBLUE, MSG_COLOR_GREEN, player->GetName(),
+                    MSG_COLOR_LIGHTBLUE, msg);
+                sWorld->SendGlobalText(message, NULL);
+            break;
+
+            case SEC_CONSOLE:
+                snprintf(message, 1024, "[World][%sAdministrator|r][%s%s|r]: %s%s|r", MSG_COLOR_RED, MSG_COLOR_LIGHTRED, player->GetName(),
+                    MSG_COLOR_LIGHTBLUE, msg);
+                sWorld->SendGlobalText(message, NULL);
+            break;
+        }
+        return true;
+    }
+
+    ChatCommand * GetCommands() const
+    {
+            static ChatCommand HandleWorldChatCommandTable[] =
+            {
+                    { "world",        SEC_PLAYER,         true,     &HandleWorldChatCommand,               "",  NULL },
+                    { NULL,              0,               false,    NULL,                                  "",  NULL }
+            };
+            return HandleWorldChatCommandTable;
+    }
+};
+
+void AddSC_World_Chat()
+{
+        new World_Chat;
+}
